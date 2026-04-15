@@ -1,6 +1,11 @@
-data,canal,tema,resumo,resolvido
-2025-09-15,chat,CDB,Cliente perguntou sobre rentabilidade e prazos,sim
-2025-09-22,telefone,Problema no app,Erro ao visualizar extrato foi corrigido,sim
-2025-10-01,chat,Tesouro Selic,Cliente pediu explicação sobre o funcionamento do Tesouro Direto,sim
-2025-10-12,chat,Metas financeiras,Cliente acompanhou o progresso da reserva de emergência,sim
-2025-10-25,email,Atualização cadastral,Cliente atualizou e-mail e telefone,sim
+data,descricao,valor,categoria,tipo_gasto
+2025-11-01,Supermercado BH,-450.00,Alimentação,Essencial
+2025-11-02,Posto Shell,-220.00,Transporte,Essencial
+2025-11-03,Netflix,-55.90,Assinaturas,Lazer
+2025-11-05,Restaurante Japonês,-120.00,Alimentação,Impulsivo
+2025-11-07,Farmácia Preço Popular,-85.00,Saúde,Essencial
+2025-11-10,Transferência Recebida,4200.00,Salário,Renda
+2025-11-12,iFood,-65.00,Alimentação,Impulsivo
+2025-11-15,Academia Shape,-110.00,Saúde,Essencial
+2025-11-18,Loja de Roupas XYZ,-300.00,Vestuário,Desejo
+2025-11-20,Corretora de Valores,-500.00,Investimentos,Investimento
