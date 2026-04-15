@@ -1,0 +1,24 @@
+{
+  "usuario": "João Silva",
+  "perfil": "Moderado",
+  "renda_mensal": 5000.00,
+  "reserva_emergencia": {
+    "status_atual": 10000.00,
+    "valor_objetivo": 15000.00,
+    "prazo": "2026-06",
+    "prioridade": "Alta"
+  },
+  "metas_longo_prazo": [
+    {
+      "descricao": "Entrada do apartamento",
+      "valor_necessario": 50000.00,
+      "valor_acumulado": 0.00,
+      "prazo": "2027-12",
+      "prioridade": "Media"
+    }
+  ],
+  "configuracoes_poupanca": {
+    "aporte_mensal_sugerido": 500.00,
+    "aceita_risco_variavel": false
+  }
+}
