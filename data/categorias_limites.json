@@ -1,0 +1,43 @@
+{
+  "usuario": "João Silva",
+  "renda_total": 5000.00,
+  "objetivo_poupanca_mensal": 500.00,
+  "limites_mensais": [
+    {
+      "categoria": "Alimentação",
+      "limite_maximo": 1200.00,
+      "alerta_em": 0.80,
+      "descricao": "Supermercado e restaurantes"
+    },
+    {
+      "categoria": "Transporte",
+      "limite_maximo": 600.00,
+      "alerta_em": 0.90,
+      "descricao": "Combustível e aplicativos"
+    },
+    {
+      "categoria": "Saúde",
+      "limite_maximo": 400.00,
+      "alerta_em": 1.00,
+      "descricao": "Farmácia e planos"
+    },
+    {
+      "categoria": "Lazer",
+      "limite_maximo": 500.00,
+      "alerta_em": 0.70,
+      "descricao": "Streaming, saídas e hobbies"
+    },
+    {
+      "categoria": "Vestuário",
+      "limite_maximo": 300.00,
+      "alerta_em": 0.50,
+      "descricao": "Roupas e acessórios"
+    },
+    {
+      "categoria": "Outros",
+      "limite_maximo": 1500.00,
+      "alerta_em": 0.90,
+      "descricao": "Aluguel, contas fixas e imprevistos"
+    }
+  ]
+}
