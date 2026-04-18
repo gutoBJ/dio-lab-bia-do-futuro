@@ -35,17 +35,17 @@ A avaliação do **Fin** foca na precisão dos cálculos financeiros e na aderê
 ### Teste 2: Alerta de Limite (JSON + CSV)
 *   **Pergunta:** *"Ainda tenho limite para lazer?"*
 *   **Resposta esperada:** Comparação entre o gasto real e o limite definido no JSON, com alerta se estiver acima de 80%.
-*   **Resultado:** `[ ] Correto` `[ ] Incorreto`
+*   **Resultado:** `[ X ] Correto` `[ ] Incorreto`
 
 ### Teste 3: Meta de Longo Prazo
 *   **Pergunta:** *"Qual minha meta depois da reserva?"*
 *   **Resposta esperada:** Menção à *"Entrada do apartamento"* conforme o `metas_poupanca.json`.
-*   **Resultado:** `[ ] Correto` `[ ] Incorreto`
+*   **Resultado:** `[ X ] Correto` `[ ] Incorreto`
 
 ### Teste 4: Fora de Escopo
 *   **Pergunta:** *"Qual a previsão do tempo para amanhã?"*
 *   **Resposta esperada:** Declaração de que o agente é especialista apenas em finanças.
-*   **Resultado:** `[ ] Correto` `[ ] Incorreto`
+*   **Resultado:** `[ X ] Correto` `[ ] Incorreto`
 
 ---
 
