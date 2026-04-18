@@ -11,78 +11,69 @@ MODEL_NAME = "gpt-oss:20b"
 
 # 3 - CÓDIGO PARA CARREGAR OS DADOS
 def carregar_dados():
-    # Caminho para a pasta data (subindo um nível a partir de src/)
     DATA_PATH = os.path.join(os.path.dirname(__file__), '..', 'data')
-    
     try:
         df_transacoes = pd.read_csv(os.path.join(DATA_PATH, 'extrato_transacoes.csv'))
         df_dicas = pd.read_csv(os.path.join(DATA_PATH, 'dicas_educativas.csv'))
-        
         with open(os.path.join(DATA_PATH, 'metas_poupanca.json'), 'r', encoding='utf-8') as f:
             metas = json.load(f)
         with open(os.path.join(DATA_PATH, 'categorias_limites.json'), 'r', encoding='utf-8') as f:
             limites = json.load(f)
-            
         return df_transacoes, df_dicas, metas, limites
     except FileNotFoundError as e:
         st.error(f"Erro: Arquivo não encontrado no caminho: {e.filename}")
         return None, None, None, None
 
-# 4 - CÓDIGO PARA MONTAR CONTEXTO (ATUALIZADO PARA PRECISÃO)
+# 4 - CÓDIGO PARA MONTAR CONTEXTO (INCLUINDO METAS DE LONGO PRAZO)
 def montar_contexto(df_t, df_d, metas, limites):
-    # Padroniza nomes de colunas para minúsculo
     df_t.columns = df_t.columns.str.lower()
     
     contexto = f"USUÁRIO: {metas['usuario']} | RENDA: R$ {metas['renda_mensal']}\n"
-    contexto += f"META: {metas['reserva_emergencia']['status_atual']} de {metas['reserva_emergencia']['valor_objetivo']} (Reserva)\n"
+    
+    # RESERVA ATUAL
+    reserva = metas['reserva_emergencia']
+    contexto += f"META ATUAL (PRIORIDADE): R$ {reserva['status_atual']} de R$ {reserva['valor_objetivo']} (Reserva de Emergência)\n"
+    
+    # METAS FUTURAS (LONGO PRAZO)
+    contexto += "\nMETAS DE LONGO PRAZO (O QUE VEM DEPOIS DA RESERVA):\n"
+    for m in metas.get('metas_longo_prazo', []):
+        contexto += f"- {m['descricao']}: Necessário R$ {m['valor_necessario']:.2f} | Prazo: {m['prazo']}\n"
     
     contexto += "\nLIMITES VS GASTOS ATUAIS (VALORES REAIS):\n"
-    
     for item in limites['limites_mensais']:
         cat_nome = item['categoria']
         limite_val = item['limite_maximo']
-        
-        # SOMA INTELIGENTE: Procura o termo na coluna 'categoria' OU na 'tipo_gasto'
-        # Isso resolve o problema da Netflix estar como 'Assinaturas' mas ser do tipo 'Lazer'
         filtro = df_t[
             (df_t['valor'] < 0) & 
             ((df_t['categoria'].str.contains(cat_nome, case=False, na=False)) | 
              (df_t['tipo_gasto'].str.contains(cat_nome, case=False, na=False)))
         ]
-        
         gasto_real = abs(filtro['valor'].sum())
         porcentagem = (gasto_real / limite_val) * 100
-        
         status = "⚠️ CRÍTICO" if porcentagem >= 80 else "✅ OK"
         contexto += f"- {cat_nome}: Gasto R$ {gasto_real:.2f} / Limite R$ {limite_val:.2f} ({porcentagem:.1f}% usado - {status})\n"
     
-    # Seleciona uma dica relevante
     dica = df_d.sample(1).iloc[0]
     contexto += f"\nDICA PARA O USUÁRIO: {dica['dica']}"
-    
     return contexto
 
 # 5 - CÓDIGO PARA SISTEMA DE PROMPT
 def system_prompt(contexto):
     return f"""Você é o Fin, um assistente de planejamento financeiro pessoal empático e consultivo. 
-Seu objetivo é ajudar o João Silva a atingir sua meta de Reserva de Emergência.
+Seu objetivo é ajudar o João Silva a controlar gastos e atingir sua meta de Reserva de Emergência e planos futuros.
 
 DIRETRIZES DE COMPORTAMENTO:
-1. ANÁLISE DE DADOS: Sempre consulte o contexto de 'extrato_transacoes.csv' e 'categorias_limites.json' antes de responder.
-2. CÁLCULOS: Para somas e porcentagens, descreva o raciocínio. Se notar que um limite de categoria ultrapassou 80%, emita um alerta amigável.
-3. EDUCAÇÃO: Sempre que identificar um gasto "Impulsivo" recorrente, sugira uma dica do arquivo 'dicas_educativas.csv'.
-4. VERACIDADE: Nunca invente transações ou saldos. Se os dados não estiverem no contexto, diga que não tem acesso a essa informação específica.
-5. PLANEJAMENTO: Quando o usuário perguntar sobre o "depois" ou metas futuras, consulte a seção 'METAS DE LONGO PRAZO'. Lembre o usuário que a prioridade ainda é a Reserva, mas mostre entusiasmo pelos planos futuros (como a entrada do apartamento).
-
+1. ANÁLISE DE DADOS: Sempre consulte o contexto fornecido antes de responder.
+2. CÁLCULOS: Se um limite ultrapassou 80%, emita um alerta amigável.
+3. PLANEJAMENTO: Quando perguntarem sobre o "depois" ou "metas futuras", consulte a seção 'METAS DE LONGO PRAZO'. Explique que a prioridade é a reserva, mas cite o próximo objetivo (ex: entrada do apartamento).
+4. VERACIDADE: Nunca invente transações. Use apenas o que está no contexto.
 
 REGRAS DE SEGURANÇA:
-- Não realize transações bancárias.
-- Não forneça dicas de investimentos em renda variável (ações/cripto), foque em economia e renda fixa para reserva.
-- Se o usuário sair do tema financeiro, use a mensagem de erro padrão, respondendo de forma educada explicando que você é o Fin, um especialista em finanças, e que seu objetivo é ajudá-lo com o dinheiro, não com outros assuntos (mencione o assunto dito pelo usuário).
+- Não realize transações bancárias nem dê dicas de ações/cripto.
+- Se o assunto fugir de finanças, decline educadamente explicando que você é o Fin, focado em ajudar com dinheiro, mencionando o assunto fora de escopo que o usuário trouxe.
 
 ESTRUTURA DE RESPOSTA:
-- Use bullet points para facilitar a leitura.
-- Mantenha um tom encorajador, nunca julgador.
+- Use bullet points e tom encorajador.
 
 CONTEXTO DOS DADOS:
 {contexto}
@@ -96,7 +87,6 @@ def chamar_ollama(prompt_sistema, pergunta_usuario):
         "stream": False
     }
     try:
-        # Timeout aumentado para modelos pesados como o gpt-oss
         response = requests.post(OLLAMA_URL, json=payload, timeout=120)
         return response.json().get("response", "Desculpe, tive um erro interno.")
     except Exception as e:
@@ -119,15 +109,17 @@ def main():
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
 
-        if prompt := st.chat_input("Como estão meus gastos?"):
+        if prompt := st.chat_input("Como estão minhas metas?"):
             st.session_state.messages.append({"role": "user", "content": prompt})
             with st.chat_message("user"):
                 st.markdown(prompt)
 
             with st.chat_message("assistant"):
-                res_sistema = system_prompt(contexto_real)
-                resposta = chamar_ollama(res_sistema, prompt)
-                st.markdown(resposta)
+                # ÍCONE DE CARREGAMENTO AQUI
+                with st.spinner("O Fin está analisando seus dados..."):
+                    res_sistema = system_prompt(contexto_real)
+                    resposta = chamar_ollama(res_sistema, prompt)
+                    st.markdown(resposta)
             
             st.session_state.messages.append({"role": "assistant", "content": resposta})
 
